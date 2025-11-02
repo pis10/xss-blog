@@ -1,5 +1,5 @@
-// Vue Router configuration
-// Includes admin routes guarded by a simple store-based check
+// 路由配置
+// 说明：含管理员后台路由，进入前做简单的权限校验（基于 Pinia 中的用户角色）
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
@@ -63,6 +63,7 @@ const router = createRouter({
   routes
 });
 
+// 全局前置守卫：需要管理员权限的路由做访问控制
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
   

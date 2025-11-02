@@ -1,8 +1,8 @@
 import DOMPurify from 'dompurify';
 
 /**
- * Sanitize HTML using DOMPurify with whitelist
- * Used in SECURE mode to prevent XSS
+ * 使用 DOMPurify 按白名单净化 HTML
+ * SECURE 模式下用于阻止 XSS 执行
  */
 export const pure = (html) => {
   if (!html) return '';
@@ -26,27 +26,23 @@ export const pure = (html) => {
 };
 
 /**
- * Get current XSS mode from config store
- * Falls back to environment variable if store not available
+ * 获取当前 XSS 模式
+ * 优先读取 window.__XSS_MODE__，否则回落到环境变量
  */
 export const getXssMode = () => {
-  // Dynamic mode from store if available
+  // 如已注入全局模式（由配置接口返回），优先使用
   if (typeof window !== 'undefined' && window.__XSS_MODE__) {
     return window.__XSS_MODE__;
   }
   return import.meta.env.VITE_XSS_MODE || 'vuln';
 };
 
-/**
- * Check if current mode is VULN
- */
+/** 判断是否为 VULN 模式 */
 export const isVulnMode = () => {
   return getXssMode() === 'vuln';
 };
 
-/**
- * Check if current mode is SECURE
- */
+/** 判断是否为 SECURE 模式 */
 export const isSecureMode = () => {
   return getXssMode() === 'secure';
 };

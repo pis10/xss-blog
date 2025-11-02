@@ -1,6 +1,6 @@
-// Config store
-// - Holds current XSS mode fetched from backend
-// - Exposes switchMode to flip between VULN and SECURE for demos
+// 配置 Store：保存与切换 XSS 模式
+// - 从后端拉取当前模式（vuln/secure），供前端渲染策略使用
+// - 提供 switchMode 以便一键切换演示模式
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import axios from '@/api/axios';

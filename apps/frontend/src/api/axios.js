@@ -6,24 +6,24 @@ const instance = axios.create({
   timeout: 10000
 });
 
-// Global Axios instance for API calls
-// Notes:
-// - In VULN mode we attach JWT from localStorage (intentionally unsafe for demo)
-// - In SECURE mode we rely on HttpOnly cookies (JS cannot read them)
-// - This mirrors the backend's dual-mode behavior to enable side-by-side demos
-// Request interceptor
+// 全局 Axios 实例
+// 说明：
+// - VULN 模式：从 localStorage 读取 JWT 并放到 Authorization 头（教学用，故意不安全）
+// - SECURE 模式：使用 HttpOnly Cookie（JS 无法读取），通过 withCredentials 让浏览器自动携带
+// - 与后端双态配置保持一致，便于演示对比
+// 请求拦截器
 instance.interceptors.request.use(
   (config) => {
     const xssMode = getXssMode();
     
     if (xssMode === 'vuln') {
-      // VULN mode: Add JWT from localStorage to Authorization header (unsafe by design)
+      // VULN 模式：从 localStorage 取 Token 并加到请求头（不安全示范）
       const token = localStorage.getItem('accessToken');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
     } else {
-      // SECURE mode: Let browser automatically send HttpOnly cookie
+      // SECURE 模式：开启 withCredentials，浏览器自动携带 HttpOnly Cookie
       config.withCredentials = true;
     }
     
@@ -34,16 +34,16 @@ instance.interceptors.request.use(
   }
 );
 
-// Response interceptor
+// 响应拦截器
 instance.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
     if (error.response?.status === 401) {
-      // Unauthorized - clear auth and redirect to login
+      // 401 未认证：清理本地 Token 并跳转登录页
       localStorage.removeItem('accessToken');
-      // Prevent redirect loop - only redirect if not already on login page
+      // 避免重定向循环：不在登录页/个人主页再跳转
       if (!window.location.pathname.includes('/login') && 
           !window.location.pathname.includes('/profile/')) {
         window.location.href = '/login';

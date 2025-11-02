@@ -55,8 +55,8 @@
 </template>
 
 <script setup>
-// Global header
-// - Mode badge toggles between VULN and SECURE (requires re-login)
+// 顶部导航
+// - 点击徽章在 VULN/SECURE 间切换（切换后会登出以确保模式生效）
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -88,7 +88,7 @@ const toggleMode = async () => {
     await configStore.switchMode(newMode);
     window.__XSS_MODE__ = newMode;
     
-    // Logout and redirect
+    // 退出登录并跳转登录页，避免旧模式的登录态残留
     await authStore.logout();
     ElMessage.success(`已切换到 ${modeText} 模式`);
     router.push('/login');

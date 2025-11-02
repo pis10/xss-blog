@@ -1,6 +1,6 @@
-// Auth store
-// - VULN mode: stores JWT in localStorage (intentionally unsafe)
-// - SECURE mode: relies on HttpOnly cookie (no token in JS)
+// 认证 Store
+// - VULN 模式：将 JWT 存在 localStorage（教学用，故意不安全）
+// - SECURE 模式：使用 HttpOnly Cookie（前端 JS 不可见）
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import axios from '@/api/axios';
@@ -19,10 +19,10 @@ export const useAuthStore = defineStore('auth', () => {
       
       const xssMode = window.__XSS_MODE__ || import.meta.env.VITE_XSS_MODE;
       if (xssMode === 'vuln' && response.data.accessToken) {
-        // VULN mode: Store JWT in localStorage
+        // VULN 模式：把后端返回的 Token 暂存到 localStorage（不安全）
         localStorage.setItem('accessToken', response.data.accessToken);
       }
-      // SECURE mode: JWT is in HttpOnly cookie, nothing to store
+      // SECURE 模式：Token 已在 Cookie 中，无需前端存储
       
       await fetchCurrentUser();
       return true;
@@ -78,7 +78,9 @@ export const useAuthStore = defineStore('auth', () => {
   async function init() {
     const xssMode = window.__XSS_MODE__ || import.meta.env.VITE_XSS_MODE;
     
-    // Only try to fetch user if we have a token (VULN) or in SECURE mode
+    // 初始化当前用户：
+    // - VULN：只有在本地存在 Token 时才请求 /auth/me
+    // - SECURE：直接请求，凭证由浏览器带上
     if (xssMode === 'vuln' && !localStorage.getItem('accessToken')) {
       return;
     }

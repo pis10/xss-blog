@@ -19,9 +19,9 @@
         </header>
         
         <div class="article-body">
-          <!-- XSS Rendering Note:
-               - VULN: render raw HTML to demonstrate XSS impact in article body
-               - SECURE: sanitize with DOMPurify to block execution -->
+          <!-- XSS 渲染说明：
+               - VULN：文章正文原样渲染（可执行脚本）
+               - SECURE：使用 DOMPurify 净化，阻断脚本执行 -->
           <div class="content"
                v-if="configStore.xssMode === 'vuln'"
                v-html="article.contentHtml"></div>
@@ -47,9 +47,9 @@
               <div class="comment-date">{{ formatDate(comment.createdAt) }}</div>
             </div>
           </div>
-          <!-- XSS Rendering Note:
-               - VULN: comments render raw HTML (stored XSS demonstration)
-               - SECURE: sanitize comment content before render -->
+          <!-- XSS 渲染说明：
+               - VULN：评论原样渲染（存储型 XSS 示例）
+               - SECURE：渲染前先净化 -->
           <div class="comment-content"
                v-if="configStore.xssMode === 'vuln'"
                v-html="comment.contentHtml"></div>
@@ -67,9 +67,9 @@
 </template>
 
 <script setup>
-// Article detail + comments view
-// - Demonstrates content rendering differences under VULN vs SECURE modes
-// - Uses DOMPurify in SECURE mode to prevent XSS
+// 文章详情与评论：演示两种模式下的内容渲染差异
+// - VULN：直接 v-html 渲染
+// - SECURE：通过 DOMPurify 净化后再渲染，防止 XSS
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from '@/api/axios';

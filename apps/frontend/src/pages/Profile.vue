@@ -1,12 +1,12 @@
 <template>
   <div class="profile-page">
     <div v-if="!loading && user" class="profile-container">
-      <!-- Banner -->
+      <!-- 顶部横幅 -->
       <div class="profile-banner" :style="{ backgroundImage: `url(${user.bannerUrl})` }">
         <div class="banner-overlay"></div>
       </div>
       
-      <!-- User Info -->
+      <!-- 用户信息 -->
       <div class="container">
         <div class="profile-header">
           <img :src="user.avatarUrl" :alt="user.username" class="profile-avatar" />
@@ -16,7 +16,7 @@
           </div>
         </div>
         
-        <!-- Bio Section - XSS L2 Entry Point -->
+        <!-- 个人简介（L2 落点）：VULN 直接渲染，SECURE 先净化再渲染 -->
         <div class="profile-bio card">
           <h3>个人简介</h3>
           <div v-if="configStore.xssMode === 'vuln'" class="bio-content" v-html="user.bio || '暂无简介'"></div>
@@ -27,7 +27,7 @@
           </div>
         </div>
         
-        <!-- User Articles -->
+        <!-- 用户文章列表 -->
         <div class="user-articles">
           <h2>发布的文章 ({{ articles.length }})</h2>
           <div class="articles-grid">
@@ -41,7 +41,7 @@
       <div class="spinner"></div>
     </div>
     
-    <!-- Edit Bio Dialog -->
+    <!-- 编辑个人简介弹窗 -->
     <el-dialog v-model="showEditDialog" title="编辑个人简介" width="600px">
       <el-input
         v-model="bioContent"
@@ -58,9 +58,9 @@
 </template>
 
 <script setup>
-// Profile page
-// - L2 demo entry: user bio renders as HTML in VULN mode
-// - SECURE mode sanitizes bio via DOMPurify
+// 个人主页（L2）：演示存储型 XSS（伪装登录表单）
+// - VULN：user.bio 原样渲染（可能执行恶意脚本）
+// - SECURE：使用 DOMPurify 净化后再渲染
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';

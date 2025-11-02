@@ -32,7 +32,7 @@
           </el-form-item>
         </el-form>
         
-        <!-- XSS L3 Demo Info -->
+        <!-- XSS 提示（L3 盲 XSS）：仅在 VULN 模式展示攻击示例 -->
         <div class="demo-info" v-if="configStore.xssMode === 'vuln'">
           <h3>⚠️ 盲 XSS 演示（L3）</h3>
           <p>此表单的内容将被保存到数据库，当管理员在后台查看时触发 XSS。</p>
@@ -47,9 +47,9 @@
 </template>
 
 <script setup>
-// Feedback form
-// - L3 demo entry: content stored to DB and rendered in admin view
-// - Demonstrates Blind XSS when admin opens feedback detail in VULN mode
+// 反馈页（L3）：演示盲 XSS
+// - 用户提交的富文本会被存入数据库
+// - 管理员在后台查看详情时触发（VULN）/被拦截（SECURE）
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useConfigStore } from '@/stores/config';

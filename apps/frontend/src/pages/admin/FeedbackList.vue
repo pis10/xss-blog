@@ -75,7 +75,7 @@
       </div>
     </main>
     
-    <!-- XSS L3 Landing Point: Feedback Detail Modal -->
+    <!-- 反馈详情弹窗（L3 落点）：VULN 直接渲染，SECURE 净化后渲染 -->
     <el-dialog
       v-model="showDetailDialog"
       title="反馈详情"
@@ -98,9 +98,9 @@
         </div>
         <div class="detail-content">
           <label>反馈内容：</label>
-          <!-- BLIND XSS L3 DEMO POINT -->
-          <!-- VULN mode: Directly render HTML from user input -->
-          <!-- SECURE mode: Sanitize with DOMPurify -->
+          <!-- 盲 XSS（L3）渲染点：
+               - VULN：直接渲染用户提交的 HTML
+               - SECURE：使用 DOMPurify 净化后再渲染 -->
           <div 
             v-if="configStore.xssMode === 'vuln'" 
             class="content-html" 
@@ -128,9 +128,9 @@
 </template>
 
 <script setup>
-// Admin feedback list + detail modal
-// - L3 Blind XSS landing: feedback content renders directly in VULN mode
-// - SECURE mode sanitizes with DOMPurify
+// 管理后台 - 反馈列表与详情（L3：盲 XSS 落点）
+// - VULN：详情内的 HTML 原样渲染，可能执行恶意脚本
+// - SECURE：先用 DOMPurify 白名单净化再渲染
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useConfigStore } from '@/stores/config';
@@ -166,7 +166,7 @@ const viewFeedback = async (feedback) => {
     currentFeedback.value = response.data;
     showDetailDialog.value = true;
     
-    // Refresh list to update status
+    // 刷新列表以更新『已读/未读』状态
     await fetchFeedbacks();
   } catch (error) {
     console.error('Failed to fetch feedback detail:', error);

@@ -15,11 +15,11 @@
         </el-input>
       </div>
       
-      <!-- XSS L0/L1 Demo Point -->
+      <!-- XSS 演示落点（L0/L1）：输入通过 URL 传入，VULN 模式直接渲染 -->
       <div v-if="searched" class="search-results">
         <div class="result-message">
-          <!-- VULN mode: v-html renders unsanitized message with user input -->
-          <!-- SECURE mode: message is already escaped by backend -->
+          <!-- VULN：v-html 原样渲染，可能执行脚本 -->
+          <!-- SECURE：后端已转义，前端用文本渲染 -->
           <div v-if="configStore.xssMode === 'vuln'" v-html="resultMessage"></div>
           <div v-else>{{ resultMessage }}</div>
         </div>
@@ -39,7 +39,7 @@
         <p>输入关键词开始搜索</p>
       </div>
       
-      <!-- XSS Demo Info -->
+      <!-- XSS 提示（仅在 VULN 模式展示） -->
       <div class="demo-info card" v-if="configStore.xssMode === 'vuln'">
         <h3>⚠️ XSS 演示提示</h3>
         <p>当前处于 VULN 模式，搜索框存在 XSS 漏洞。尝试输入：</p>
@@ -52,8 +52,7 @@
 </template>
 
 <script setup>
-// Search page
-// - L0/L1 demo landing: reflected XSS via query parameter rendering
+// 搜索页（L0/L1）：演示反射型 XSS 与凭证窃取
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useConfigStore } from '@/stores/config';
@@ -78,7 +77,7 @@ const handleSearch = async () => {
   try {
     const response = await axios.get('/search', { params: { q: query.value } });
     
-    // Backend returns different message based on XSS mode
+    // 不同模式下，后端返回的提示文案不同（VULN 未转义 / SECURE 已转义）
     resultMessage.value = response.data.message;
     results.value = response.data.items || [];
     searched.value = true;
