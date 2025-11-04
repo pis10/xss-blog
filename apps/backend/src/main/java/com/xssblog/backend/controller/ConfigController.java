@@ -1,8 +1,6 @@
 package com.xssblog.backend.controller;
 
 import com.xssblog.backend.config.XssProperties;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +35,6 @@ public class ConfigController {
      * 
      * @return 包含 xssMode 字段的 JSON 对象
      */
-    @Cacheable(value = "config", key = "'xssMode'")
     @GetMapping("/config")
     public Map<String, Object> getConfig() {
         return Map.of("xssMode", xssProperties.getMode());
@@ -51,7 +48,6 @@ public class ConfigController {
      * @param request 包含 mode 字段的请求体
      * @return 成功时返回新模式和提示信息，失败时返回错误信息
      */
-    @CacheEvict(value = "config", allEntries = true)
     @PostMapping("/config/mode")
     public ResponseEntity<Map<String, Object>> switchMode(@RequestBody Map<String, String> request) {
         String newMode = request.get("mode");
