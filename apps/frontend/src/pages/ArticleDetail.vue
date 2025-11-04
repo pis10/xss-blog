@@ -39,6 +39,32 @@
       
       <section class="comments-section">
         <h3>评论 ({{ comments.length }})</h3>
+        
+        <!-- 评论输入框：只在登录后显示 -->
+        <div v-if="authStore.isAuthenticated" class="comment-form card">
+          <el-form @submit.prevent="submitComment">
+            <el-form-item>
+              <el-input
+                v-model="newComment"
+                type="textarea"
+                :rows="3"
+                placeholder="写下你的评论..."
+                maxlength="2000"
+                show-word-limit
+              />
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" native-type="submit" :loading="submitting" :disabled="!newComment.trim()">
+                发表评论
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+        <div v-else class="login-prompt card">
+          <p>登录后才能发表评论。 <router-link to="/login">立即登录</router-link></p>
+        </div>
+        
+        <!-- 评论列表 -->
         <div v-for="comment in comments" :key="comment.id" class="comment card">
           <div class="comment-author">
             <img :src="comment.user.avatarUrl" :alt="comment.user.username" />
@@ -74,13 +100,18 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from '@/api/axios';
 import { useConfigStore } from '@/stores/config';
+import { useAuthStore } from '@/stores/auth';
 import { pure } from '@/utils/xss';
+import { ElMessage } from 'element-plus';
 
 const route = useRoute();
 const configStore = useConfigStore();
+const authStore = useAuthStore();
 const article = ref(null);
 const comments = ref([]);
 const loading = ref(true);
+const newComment = ref('');
+const submitting = ref(false);
 
 const fetchArticle = async () => {
   try {
@@ -93,6 +124,27 @@ const fetchArticle = async () => {
     console.error('Failed to fetch article:', error);
   } finally {
     loading.value = false;
+  }
+};
+
+const submitComment = async () => {
+  if (!newComment.value.trim()) return;
+  
+  submitting.value = true;
+  try {
+    const response = await axios.post(`/articles/${route.params.id}/comments`, {
+      content: newComment.value
+    });
+    
+    // 添加新评论到列表首位
+    comments.value.unshift(response.data);
+    newComment.value = '';
+    ElMessage.success('评论发表成功！');
+  } catch (error) {
+    console.error('Failed to submit comment:', error);
+    ElMessage.error('评论发表失败，请重试');
+  } finally {
+    submitting.value = false;
   }
 };
 
@@ -218,6 +270,42 @@ onMounted(() => {
 
 .comments-section h3 {
   margin-bottom: var(--spacing-xl);
+}
+
+.comment-form {
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-lg);
+}
+
+.comment-form :deep(.el-form-item) {
+  margin-bottom: var(--spacing-md);
+}
+
+.comment-form :deep(.el-form-item:last-child) {
+  margin-bottom: 0;
+}
+
+.login-prompt {
+  padding: var(--spacing-xl);
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+  background: var(--color-bg-secondary);
+  border: 1px dashed var(--color-border);
+}
+
+.login-prompt p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.login-prompt a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-prompt a:hover {
+  text-decoration: underline;
 }
 
 .comment {

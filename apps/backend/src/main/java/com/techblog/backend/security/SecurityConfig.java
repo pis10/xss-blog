@@ -75,9 +75,11 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             // 请求授权配置
             .authorizeHttpRequests(auth -> auth
-                // 公开访问的接口（登录、注册、配置、文章、个人主页、搜索、反馈）
-                .requestMatchers("/api/auth/**", "/api/config/**", "/api/articles/**", 
-                                "/api/profile/**", "/api/search", "/api/feedback").permitAll()
+                // 公开访问的接口（登录、注册、配置、文章查询、评论查询、个人主页、搜索、反馈）
+                .requestMatchers("/api/auth/**", "/api/config/**", "/api/search", "/api/feedback").permitAll()
+                // 文章相关：查询公开，评论提交需要认证
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/articles/**").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/profile/**").permitAll()
                 // 管理员接口（仅 ADMIN 角色可访问）
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 // 其他所有请求均需认证

