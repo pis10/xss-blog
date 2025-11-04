@@ -1,6 +1,5 @@
 package com.techblog.backend.config;
 
-import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,7 +14,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConfigurationProperties(prefix = "security.jwt")
-@Data
 public class JwtProperties {
     /** JWT 签名密钥，用于 HS256 算法 */
     private String secret;
@@ -25,4 +23,30 @@ public class JwtProperties {
     
     /** 访问令牌有效期（分钟），默认 30 分钟 */
     private Integer accessTtlMinutes = 30;
+    
+    // Getter 和 Setter 方法
+    
+    public String getSecret() {
+        return secret;
+    }
+    
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+    
+    public String getIssuer() {
+        return issuer;
+    }
+    
+    public void setIssuer(String issuer) {
+        this.issuer = issuer;
+    }
+    
+    public Integer getAccessTtlMinutes() {
+        return accessTtlMinutes;
+    }
+    
+    public void setAccessTtlMinutes(Integer accessTtlMinutes) {
+        this.accessTtlMinutes = accessTtlMinutes;
+    }
 }

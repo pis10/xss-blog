@@ -1,6 +1,5 @@
 package com.techblog.backend.config;
 
-import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,10 +15,17 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConfigurationProperties(prefix = "xss")
-@Data
 public class XssProperties {
     // 使用 volatile 保证多线程环境下的可见性，支持运行时切换
     private volatile String mode = "vuln";
+    
+    /**
+     * 获取当前 XSS 模式
+     * @return 模式名称（vuln 或 secure）
+     */
+    public String getMode() {
+        return mode;
+    }
     
     /**
      * 判断当前是否为 VULN 模式

@@ -4,18 +4,34 @@ import com.techblog.backend.dto.*;
 import com.techblog.backend.entity.User;
 import com.techblog.backend.repository.UserRepository;
 import com.techblog.backend.security.JwtTokenProvider;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 认证服务
+ * 负责用户注册、登录和令牌生成
+ */
 @Service
-@RequiredArgsConstructor
 public class AuthService {
     
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    
+    /**
+     * 构造函数，注入依赖
+     * @param userRepository 用户仓库
+     * @param passwordEncoder 密码加密器
+     * @param jwtTokenProvider JWT 令牌提供者
+     */
+    public AuthService(UserRepository userRepository, 
+                      PasswordEncoder passwordEncoder,
+                      JwtTokenProvider jwtTokenProvider) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
     
     @Transactional
     public AuthResponse register(RegisterRequest request) {

@@ -3,7 +3,6 @@ package com.techblog.backend.service;
 import com.techblog.backend.dto.UserDto;
 import com.techblog.backend.entity.User;
 import com.techblog.backend.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,10 +15,17 @@ import org.springframework.transaction.annotation.Transactional;
  * - 更新用户 Bio（个人简介）——XSS L2 攻击入口
  */
 @Service
-@RequiredArgsConstructor
 public class UserService {
     
     private final UserRepository userRepository;
+    
+    /**
+     * 构造函数，注入依赖
+     * @param userRepository 用户仓库
+     */
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
     
     /**
      * 根据用户名查询用户信息

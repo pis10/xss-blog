@@ -1,7 +1,6 @@
 package com.techblog.backend.controller;
 
 import com.techblog.backend.config.XssProperties;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,10 +18,16 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api")
-@RequiredArgsConstructor
 public class ConfigController {
     
     private final XssProperties xssProperties;
+    
+    /**
+     * 构造函数注入依赖
+     */
+    public ConfigController(XssProperties xssProperties) {
+        this.xssProperties = xssProperties;
+    }
     
     /**
      * 获取当前 XSS 模式

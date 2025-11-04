@@ -1,7 +1,6 @@
 package com.techblog.backend.controller;
 
 import com.techblog.backend.config.XssProperties;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,10 +24,16 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api")
-@RequiredArgsConstructor
 public class SearchController {
     
     private final XssProperties xssProperties;
+    
+    /**
+     * 构造函数注入依赖
+     */
+    public SearchController(XssProperties xssProperties) {
+        this.xssProperties = xssProperties;
+    }
     
     /**
      * 搜索文章接口（XSS 演示入口点）

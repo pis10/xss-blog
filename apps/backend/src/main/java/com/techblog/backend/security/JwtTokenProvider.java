@@ -5,7 +5,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -29,11 +28,18 @@ import java.util.UUID;
  * - jti: 令牌唯一 ID
  */
 @Component
-@RequiredArgsConstructor
 public class JwtTokenProvider {
     
     private final JwtProperties jwtProperties;
     private SecretKey secretKey;
+    
+    /**
+     * 构造函数，注入 JWT 配置
+     * @param jwtProperties JWT 配置属性
+     */
+    public JwtTokenProvider(JwtProperties jwtProperties) {
+        this.jwtProperties = jwtProperties;
+    }
     
     /**
      * 初始化方法，构建后自动执行

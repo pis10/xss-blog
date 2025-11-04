@@ -1,6 +1,7 @@
 package com.techblog.backend.config;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -24,9 +25,13 @@ import java.util.Map;
  * - RuntimeException: 业务逻辑异常
  * - Exception: 未预期的系统异常
  */
-@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    
+    /**
+     * 日志记录器
+     */
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     
     /**
      * 处理参数校验异常（@Valid/@Validated 注解触发）

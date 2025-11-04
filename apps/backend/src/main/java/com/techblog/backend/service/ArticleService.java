@@ -8,7 +8,6 @@ import com.techblog.backend.entity.User;
 import com.techblog.backend.repository.ArticleRepository;
 import com.techblog.backend.repository.CommentRepository;
 import com.techblog.backend.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,14 +16,31 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * 文章服务
+ * 负责文章和评论的查询业务逻辑
+ */
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ArticleService {
     
     private final ArticleRepository articleRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
+    
+    /**
+     * 构造函数，注入依赖
+     * @param articleRepository 文章仓库
+     * @param commentRepository 评论仓库
+     * @param userRepository 用户仓库
+     */
+    public ArticleService(ArticleRepository articleRepository,
+                         CommentRepository commentRepository,
+                         UserRepository userRepository) {
+        this.articleRepository = articleRepository;
+        this.commentRepository = commentRepository;
+        this.userRepository = userRepository;
+    }
     
     public Page<ArticleDto> getAllArticles(Pageable pageable) {
         return articleRepository.findAllByOrderByPublishedAtDesc(pageable)

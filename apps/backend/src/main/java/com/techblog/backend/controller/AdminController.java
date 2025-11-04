@@ -2,7 +2,6 @@ package com.techblog.backend.controller;
 
 import com.techblog.backend.dto.FeedbackDto;
 import com.techblog.backend.service.FeedbackService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,12 +18,18 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/admin")
-@RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
     
     // 通过构造函数注入FeedbackService服务
     private final FeedbackService feedbackService;
+    
+    /**
+     * 构造函数注入依赖
+     */
+    public AdminController(FeedbackService feedbackService) {
+        this.feedbackService = feedbackService;
+    }
     
     /**
      * 获取所有用户反馈列表（分页）

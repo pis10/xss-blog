@@ -4,17 +4,30 @@ import com.techblog.backend.dto.FeedbackDto;
 import com.techblog.backend.dto.FeedbackRequest;
 import com.techblog.backend.entity.Feedback;
 import com.techblog.backend.repository.FeedbackRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 反馈服务
+ * 负责用户反馈的提交和管理逻辑
+ * 
+ * 安全注意：
+ * - 此服务涉及 XSS L3 盲 XSS 攻击场景
+ */
 @Service
-@RequiredArgsConstructor
 public class FeedbackService {
     
     private final FeedbackRepository feedbackRepository;
+    
+    /**
+     * 构造函数，注入依赖
+     * @param feedbackRepository 反馈仓库
+     */
+    public FeedbackService(FeedbackRepository feedbackRepository) {
+        this.feedbackRepository = feedbackRepository;
+    }
     
     @Transactional
     public void submitFeedback(FeedbackRequest request) {
