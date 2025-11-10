@@ -16,7 +16,7 @@
           </div>
         </div>
         
-        <!-- 个人简介（场景 4 落点）：VULN 直接渲染，SECURE 先净化再渲染 -->
+        <!-- 个人简介：VULN 直接渲染，SECURE 先净化再渲染 -->
         <div class="profile-bio card">
           <h3>个人简介</h3>
           <div v-if="configStore.xssMode === 'vuln'" class="bio-content" v-html="user.bio || '暂无简介'"></div>

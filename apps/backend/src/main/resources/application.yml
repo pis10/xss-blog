@@ -20,7 +20,7 @@ spring:
   
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update  # 开发环境使用update自动更新表结构
     show-sql: true
     properties:
       hibernate:

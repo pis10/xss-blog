@@ -54,11 +54,11 @@ public class AuthController {
         AuthResponse authResponse = authService.register(request);
         
         if (xssProperties.isSecure()) {
-            // SECURE mode: Set HttpOnly Cookie
+            // SECURE 模式：设置 HttpOnly Cookie
             setSecureCookie(response, authResponse.getAccessToken());
             return ResponseEntity.noContent().build();
         } else {
-            // VULN mode: Return JWT in response body
+            // VULN 模式：在响应体中返回 JWT
             return ResponseEntity.ok(authResponse);
         }
     }
@@ -76,11 +76,11 @@ public class AuthController {
         AuthResponse authResponse = authService.login(request);
         
         if (xssProperties.isSecure()) {
-            // SECURE mode: Set HttpOnly Cookie
+            // SECURE 模式：设置 HttpOnly Cookie
             setSecureCookie(response, authResponse.getAccessToken());
             return ResponseEntity.noContent().build();
         } else {
-            // VULN mode: Return JWT in response body
+            // VULN 模式：在响应体中返回 JWT
             return ResponseEntity.ok(authResponse);
         }
     }
@@ -94,7 +94,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
         if (xssProperties.isSecure()) {
-            // Clear cookie
+            // 清除 Cookie
             Cookie cookie = new Cookie("access", "");
             cookie.setHttpOnly(true);
             cookie.setSecure(true);

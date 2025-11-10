@@ -13,7 +13,7 @@ export const pure = (html) => {
   if (!html) return '';
 
   return DOMPurify.sanitize(html, {
-    USE_PROFILES: { html: true }, // 关闭 SVG/MathML 路径
+    USE_PROFILES: { html: true }, 
     
     ALLOWED_TAGS: [
       'b','i','em','strong','a','p','code','pre',
