@@ -1,8 +1,13 @@
 package com.xssblog.backend.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.Arrays;
 
 /**
  * Web 配置类
@@ -20,34 +25,44 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
     
     /**
-     * 配置 CORS 映射规则
-     * 允许前端从不同源访问后端 API
+     * CORS 配置源 Bean
+     * Spring Security 6 推荐的标准方式
      */
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
-                // 允许的源地址（包含 localhost 和 127.0.0.1）
-                .allowedOrigins(
-                    "http://localhost:5173",
-                    "http://localhost:5174",
-                    "http://127.0.0.1:5173",
-                    "http://127.0.0.1:5174",
-                    "http://localhost:80",
-                    "http://localhost"
-                )
-                // 允许的 HTTP 方法
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                // 允许的请求头（白名单）
-                .allowedHeaders(
-                    "Content-Type",
-                    "Authorization",
-                    "X-Requested-With",
-                    "Accept",
-                    "Origin"
-                )
-                // 允许携带凭证（Cookie、Authorization 头等）
-                .allowCredentials(true)
-                // 预检请求缓存时间（秒）
-                .maxAge(3600);
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        
+        // 允许的源地址（包含 localhost 和 127.0.0.1）
+        config.setAllowedOrigins(Arrays.asList(
+            "http://localhost:5173",
+            "http://localhost:5174",
+            "http://127.0.0.1:5173",
+            "http://127.0.0.1:5174",
+            "http://localhost:80",
+            "http://localhost"
+        ));
+        
+        // 允许的 HTTP 方法
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        
+        // 允许的请求头（白名单）
+        config.setAllowedHeaders(Arrays.asList(
+            "Content-Type",
+            "Authorization",
+            "X-Requested-With",
+            "Accept",
+            "Origin"
+        ));
+        
+        // 允许携带凭证（Cookie、Authorization 头等）
+        config.setAllowCredentials(true);
+        
+        // 预检请求缓存时间（秒）
+        config.setMaxAge(3600L);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", config);
+        
+        return source;
     }
 }

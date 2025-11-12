@@ -1,5 +1,6 @@
 package com.xssblog.backend.security;
 
+import com.xssblog.backend.config.XssProperties;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -19,11 +20,11 @@ import java.util.Collections;
 
 /**
  * JWT 认证过滤器
- * 拦截 HTTP 请求，从请求中提取 JWT 并验证身份
+ * 拦截 HTTP 请求,从请求中提取 JWT 并验证身份
  * 
- * 双态实现：
- * - VULN 模式：从 Authorization 请求头读取 JWT
- * - SECURE 模式：从 HttpOnly Cookie 读取 JWT
+ * 双态实现:
+ * - VULN 模式:从 Authorization 请求头读取 JWT
+ * - SECURE 模式:仅从 HttpOnly Cookie 读取 JWT(拒绝 Header)
  */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -34,12 +35,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     
     private final JwtTokenProvider jwtTokenProvider;
+    private final XssProperties xssProperties;
     
     /**
      * 构造函数注入依赖
      */
-    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
+    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider,
+                                   XssProperties xssProperties) {
         this.jwtTokenProvider = jwtTokenProvider;
+        this.xssProperties = xssProperties;
     }
     
     /**
@@ -76,23 +80,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     
     /**
      * 从 HTTP 请求中提取 JWT Token
-     * 优先级：
-     * 1. Authorization 请求头（VULN 模式）
-     * 2. HttpOnly Cookie（SECURE 模式）
+     * 根据 XSS 模式严格区分来源：
+     * - VULN 模式：优先 Authorization 头，降级至 Cookie
+     * - SECURE 模式：仅接受 HttpOnly Cookie，拒绝 Header
      */
     private String extractJwtFromRequest(HttpServletRequest request) {
-        // Priority 1: Authorization header (VULN mode)
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-        
-        // Priority 2: HttpOnly Cookie (SECURE mode)
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("access".equals(cookie.getName())) {
-                    return cookie.getValue();
+        if (xssProperties.isSecure()) {
+            // SECURE 模式：仅从 Cookie 读取，强化教学对比
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("access".equals(cookie.getName())) {
+                        log.debug("Token extracted from HttpOnly Cookie (SECURE mode)");
+                        return cookie.getValue();
+                    }
+                }
+            }
+        } else {
+            // VULN 模式：优先 Authorization 头，兼容 Cookie
+            String bearerToken = request.getHeader("Authorization");
+            if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+                log.debug("Token extracted from Authorization header (VULN mode)");
+                return bearerToken.substring(7);
+            }
+            
+            // 降级：从 Cookie 读取（兼容混合场景）
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("access".equals(cookie.getName())) {
+                        log.debug("Token extracted from Cookie fallback (VULN mode)");
+                        return cookie.getValue();
+                    }
                 }
             }
         }

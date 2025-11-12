@@ -12,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
  * Spring Security 安全配置类
@@ -36,14 +37,17 @@ public class SecurityConfig {
     
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final XssProperties xssProperties;
+    private final CorsConfigurationSource corsConfigurationSource;
     
     /**
      * 构造函数注入依赖
      */
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
-                         XssProperties xssProperties) {
+                         XssProperties xssProperties,
+                         CorsConfigurationSource corsConfigurationSource) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.xssProperties = xssProperties;
+        this.corsConfigurationSource = corsConfigurationSource;
     }
     
     /**
@@ -68,8 +72,8 @@ public class SecurityConfig {
         http
             // 禁用 CSRF 保护（JWT 无状态认证不需要 CSRF 保护）
             .csrf(AbstractHttpConfigurer::disable)
-            // 启用 CORS 支持（使用 WebConfig 中的配置）
-            .cors(cors -> cors.configure(http))
+            // 启用 CORS 支持（使用 WebConfig 中的 Bean）
+            .cors(cors -> cors.configurationSource(corsConfigurationSource))
             // 无状态会话管理（不创建 HttpSession）
             .sessionManagement(session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

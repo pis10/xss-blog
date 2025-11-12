@@ -10,9 +10,9 @@ import java.time.LocalDateTime;
  * 反馈实体类
  * 用于存储用户提交的反馈信息
  * 
- * XSS 场景 5：盲 XSS
+ * XSS 场景 3：盲 XSS
  * - contentHtml 字段在 VULN 模式下可能包含恶意代码
- * - 管理员查看反馈时触发（政击者无法直接观察执行结果）
+ * - 管理员查看反馈时触发（攻击者无法直接观察执行结果）
  */
 @Entity
 @Table(name = "feedbacks")

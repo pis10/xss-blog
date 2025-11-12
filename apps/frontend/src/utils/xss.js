@@ -4,8 +4,8 @@ import DOMPurify from 'dompurify';
  * 使用 DOMPurify 按白名单净化 HTML
  * SECURE 模式下用于阻止 XSS 执行
  * 
- * 安全增强版：
- * - 禁用 SVG/MathML（防止复杂攻击）
+ * 安全增强版:
+ * - 禁用 SVG/MathML(防止复杂攻击)
  * - 显式禁止危险标签和属性
  * - 更严格的 URL 协议限制
  */
@@ -13,8 +13,6 @@ export const pure = (html) => {
   if (!html) return '';
 
   return DOMPurify.sanitize(html, {
-    USE_PROFILES: { html: true }, 
-    
     ALLOWED_TAGS: [
       'b','i','em','strong','a','p','code','pre',
       'ul','ol','li','h1','h2','h3','h4',
@@ -22,8 +20,6 @@ export const pure = (html) => {
     ],
     
     ALLOWED_ATTR: ['href','title','target','rel','class'],
-    
-    FORBID_ATTR: ['on*','style','srcset','formaction'],
     
     FORBID_TAGS: [
       'img','iframe','object','embed','form','input','textarea',

@@ -65,7 +65,7 @@ CREATE TABLE comments (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     article_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    content_html VARCHAR(1000),  -- 限制长度
+    content_html TEXT,  -- 与 CommentRequest(2000) 一致
     created_at DATETIME NOT NULL,
     FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,

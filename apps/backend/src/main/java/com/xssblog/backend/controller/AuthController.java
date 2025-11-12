@@ -94,12 +94,13 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
         if (xssProperties.isSecure()) {
-            // 清除 Cookie
+            // 清除 Cookie（复用统一配置，防止 HTTP 环境清不掉）
             Cookie cookie = new Cookie("access", "");
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
+            cookie.setHttpOnly(cookieProperties.getHttpOnly());
+            cookie.setSecure(cookieProperties.getSecure());
             cookie.setPath("/");
-            cookie.setMaxAge(0);
+            cookie.setMaxAge(0);  // 立即过期
+            cookie.setAttribute("SameSite", cookieProperties.getSameSite());
             response.addCookie(cookie);
         }
         return ResponseEntity.noContent().build();
